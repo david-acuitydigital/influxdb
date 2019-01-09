@@ -87,10 +87,11 @@ func NewDashboardHandler(mappingService platform.UserResourceMappingService, lab
 }
 
 type dashboardLinks struct {
-	Self   string `json:"self"`
-	Cells  string `json:"cells"`
-	Log    string `json:"log"`
-	Labels string `json:"labels"`
+	Self         string `json:"self"`
+	Cells        string `json:"cells"`
+	Log          string `json:"log"`
+	Labels       string `json:"labels"`
+	Organization string `json:"org"`
 }
 
 type dashboardResponse struct {
@@ -119,10 +120,11 @@ func (d dashboardResponse) toPlatform() *platform.Dashboard {
 func newDashboardResponse(d *platform.Dashboard, labels []*platform.Label) dashboardResponse {
 	res := dashboardResponse{
 		Links: dashboardLinks{
-			Self:   fmt.Sprintf("/api/v2/dashboards/%s", d.ID),
-			Cells:  fmt.Sprintf("/api/v2/dashboards/%s/cells", d.ID),
-			Log:    fmt.Sprintf("/api/v2/dashboards/%s/log", d.ID),
-			Labels: fmt.Sprintf("/api/v2/dashboards/%s/labels", d.ID),
+			Self:         fmt.Sprintf("/api/v2/dashboards/%s", d.ID),
+			Cells:        fmt.Sprintf("/api/v2/dashboards/%s/cells", d.ID),
+			Log:          fmt.Sprintf("/api/v2/dashboards/%s/log", d.ID),
+			Labels:       fmt.Sprintf("/api/v2/dashboards/%s/labels", d.ID),
+			Organization: fmt.Sprintf("/api/v2/orgs/%s", d.OrganizationID),
 		},
 		Dashboard: *d,
 		Labels:    []platform.Label{},
@@ -280,11 +282,17 @@ func decodeGetDashboardsRequest(ctx context.Context, r *http.Request) (*getDashb
 			}
 			req.filter.IDs = append(req.filter.IDs, &i)
 		}
-	} else if owner := qp.Get("owner"); owner != "" {
+	} else if ownerID := qp.Get("ownerID"); ownerID != "" {
 		req.ownerID = &initialID
-		if err := req.ownerID.DecodeFromString(owner); err != nil {
+		if err := req.ownerID.DecodeFromString(ownerID); err != nil {
 			return nil, err
 		}
+	} else if orgID := qp.Get("orgID"); orgID != "" {
+		id := platform.InvalidID()
+		if err := id.DecodeFromString(orgID); err != nil {
+			return nil, err
+		}
+		req.filter.OrganizationID = &id
 	}
 
 	req.opts = platform.DefaultDashboardFindOptions
