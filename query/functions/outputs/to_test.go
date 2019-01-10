@@ -9,7 +9,6 @@ import (
 	"github.com/influxdata/flux/ast"
 	"github.com/influxdata/flux/execute"
 	"github.com/influxdata/flux/execute/executetest"
-	"github.com/influxdata/flux/functions/inputs"
 	"github.com/influxdata/flux/semantic"
 	platform "github.com/influxdata/influxdb"
 	"github.com/influxdata/influxdb/mock"

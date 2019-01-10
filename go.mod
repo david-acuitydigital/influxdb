@@ -157,3 +157,5 @@ replace (
 replace github.com/getkin/kin-openapi v0.1.0 => github.com/influxdata/kin-openapi v0.1.1-0.20181212221347-ca3615a71f83
 
 replace github.com/influxdata/platform => /dev/null
+
+replace github.com/influxdata/flux => ../flux
