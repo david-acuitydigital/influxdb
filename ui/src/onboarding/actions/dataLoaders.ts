@@ -55,6 +55,7 @@ export type Action =
   | RemovePluginBundle
   | SetPluginConfiguration
   | SetConfigArrayValue
+  | SetScrapingParams
 
 interface SetDataLoadersType {
   type: 'SET_DATA_LOADERS_TYPE'
@@ -199,6 +200,24 @@ export const removeBundlePlugins = (
 ): RemoveBundlePlugins => ({
   type: 'REMOVE_BUNDLE_PLUGINS',
   payload: {bundle},
+})
+
+interface ScrapingParams {
+  interval: string
+  bucket: string
+  targetUrls: string[]
+}
+
+interface SetScrapingParams {
+  type: 'SET_SCRAPING_PARAMS'
+  payload: {scrapingParams: ScrapingParams}
+}
+
+export const setScrapingParams = (
+  scrapingParams: ScrapingParams
+): SetScrapingParams => ({
+  type: 'SET_SCRAPING_PARAMS',
+  payload: {scrapingParams},
 })
 
 export const addPluginBundleWithPlugins = (bundle: BundleName) => dispatch => {
