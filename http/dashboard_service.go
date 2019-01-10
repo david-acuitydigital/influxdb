@@ -110,10 +110,11 @@ func (d dashboardResponse) toPlatform() *platform.Dashboard {
 		cells[i] = d.Cells[i].toPlatform()
 	}
 	return &platform.Dashboard{
-		ID:    d.ID,
-		Name:  d.Name,
-		Meta:  d.Meta,
-		Cells: cells,
+		ID:             d.ID,
+		OrganizationID: d.OrganizationID,
+		Name:           d.Name,
+		Meta:           d.Meta,
+		Cells:          cells,
 	}
 }
 
@@ -969,6 +970,9 @@ func (s *DashboardService) FindDashboards(ctx context.Context, filter platform.D
 	qp.Add("sortBy", opts.SortBy)
 	for _, id := range filter.IDs {
 		qp.Add("id", id.String())
+	}
+	if filter.OrganizationID != nil {
+		qp.Add("orgID", filter.OrganizationID.String())
 	}
 	url.RawQuery = qp.Encode()
 
