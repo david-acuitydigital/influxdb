@@ -67,7 +67,7 @@ func (c *Client) FindDashboardByID(ctx context.Context, id platform.ID) (*platfo
 	return d, nil
 }
 
-func (c *Client) findDashboardByID(ctx context.Context, tx *bolt.Tx, id platform.ID) (*platform.Dashboard, *platform.Error) {
+func (c *Client) findDashboardByID(ctx context.Context, tx *bolt.Tx, id platform.ID) (*platform.Dashboard, error) {
 	encodedID, err := id.Encode()
 	if err != nil {
 		return nil, &platform.Error{
@@ -187,9 +187,9 @@ func (c *Client) findOrganizationDashboards(ctx context.Context, tx *bolt.Tx, or
 	}
 
 	ds := []*platform.Dashboard{}
-	for k, v := cur.Seek(prefix); bytes.HasPrefix(k, prefix); k, v = cur.Next() {
-		id := platform.ID(0)
-		if err := id.Decode(v); err != nil {
+	for k, _ := cur.Seek(prefix); bytes.HasPrefix(k, prefix); k, _ = cur.Next() {
+		_, id, err := decodeOrgDashboardIndexKey(k)
+		if err != nil {
 			return nil, err
 		}
 
@@ -202,6 +202,22 @@ func (c *Client) findOrganizationDashboards(ctx context.Context, tx *bolt.Tx, or
 	}
 
 	return ds, nil
+}
+
+func decodeOrgDashboardIndexKey(indexKey []byte) (orgID platform.ID, dashID platform.ID, err error) {
+	if len(indexKey) != 2*platform.IDLength {
+		return 0, 0, &platform.Error{Code: platform.EInvalid, Msg: "malformed org dashboard index key (please report this error)"}
+	}
+
+	if err := (&orgID).Decode(indexKey[:platform.IDLength]); err != nil {
+		return 0, 0, &platform.Error{Code: platform.EInvalid, Msg: "bad org id", Err: platform.ErrInvalidID}
+	}
+
+	if err := (&dashID).Decode(indexKey[platform.IDLength:]); err != nil {
+		return 0, 0, &platform.Error{Code: platform.EInvalid, Msg: "bad dashboard id", Err: platform.ErrInvalidID}
+	}
+
+	return orgID, dashID, nil
 }
 
 func (c *Client) findDashboards(ctx context.Context, tx *bolt.Tx, filter platform.DashboardFilter) ([]*platform.Dashboard, error) {
@@ -624,11 +640,7 @@ func (c *Client) putOrganizationDashboardIndex(ctx context.Context, tx *bolt.Tx,
 	if err != nil {
 		return err
 	}
-	v, err := d.ID.Encode()
-	if err != nil {
-		return err
-	}
-	if err := tx.Bucket(orgDashboardIndex).Put(k, v); err != nil {
+	if err := tx.Bucket(orgDashboardIndex).Put(k, nil); err != nil {
 		return err
 	}
 
@@ -744,7 +756,7 @@ func (c *Client) DeleteDashboard(ctx context.Context, id platform.ID) error {
 	})
 }
 
-func (c *Client) deleteDashboard(ctx context.Context, tx *bolt.Tx, id platform.ID) *platform.Error {
+func (c *Client) deleteDashboard(ctx context.Context, tx *bolt.Tx, id platform.ID) error {
 	d, pe := c.findDashboardByID(ctx, tx, id)
 	if pe != nil {
 		return pe
