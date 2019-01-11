@@ -125,6 +125,7 @@ type Cell struct {
 type DashboardFilter struct {
 	IDs            []*ID
 	OrganizationID *ID
+	Organization   *string
 }
 
 // QueryParams turns a dashboard filter into query params

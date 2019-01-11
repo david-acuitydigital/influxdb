@@ -294,6 +294,8 @@ func decodeGetDashboardsRequest(ctx context.Context, r *http.Request) (*getDashb
 			return nil, err
 		}
 		req.filter.OrganizationID = &id
+	} else if org := qp.Get("org"); org != "" {
+		req.filter.Organization = &org
 	}
 
 	req.opts = platform.DefaultDashboardFindOptions

@@ -225,6 +225,14 @@ func (c *Client) findDashboards(ctx context.Context, tx *bolt.Tx, filter platfor
 		return c.findOrganizationDashboards(ctx, tx, *filter.OrganizationID)
 	}
 
+	if filter.Organization != nil {
+		o, err := c.findOrganizationByName(ctx, tx, *filter.Organization)
+		if err != nil {
+			return nil, err
+		}
+		return c.findOrganizationDashboards(ctx, tx, o.ID)
+	}
+
 	ds := []*platform.Dashboard{}
 
 	filterFn := filterDashboardsFn(filter)
