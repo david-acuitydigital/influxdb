@@ -12,7 +12,7 @@ import (
 	"github.com/influxdata/flux/ast"
 	"github.com/influxdata/flux/execute"
 	"github.com/influxdata/flux/semantic"
-	"github.com/influxdata/flux/stdlib/inputs"
+	"github.com/influxdata/flux/stdlib/influxdata/influxdb"
 	"github.com/influxdata/flux/stdlib/universe"
 	platform "github.com/influxdata/influxdb"
 	pinputs "github.com/influxdata/influxdb/query/functions/inputs"
@@ -360,7 +360,7 @@ func (t *transpilerState) from(m *influxql.Measurement) (flux.OperationID, error
 		return "", err
 	}
 
-	spec := &inputs.FromOpSpec{
+	spec := &influxdb.FromOpSpec{
 		BucketID: mapping.BucketID.String(),
 	}
 	return t.op("from", spec), nil

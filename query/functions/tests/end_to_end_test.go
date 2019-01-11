@@ -42,11 +42,12 @@ func init() {
 }
 
 var loadTestBuiltin = `
-// loadData is a function that's referenced in all the transformation tests.  
-// it's registered here so that we can register a different loadData function for 
-// each platform/binary.  
-testLoadStorageHelper = (csv, bucket, org) => {fromCSV(csv: csv) |> to(bucket: bucket, org: org) return from(bucket: bucket) }
-testLoadMem = (csv) => fromCSV(csv: csv)
+import c "csv"
+// loadData is a function that's referenced in all the transformation tests.
+// it's registered here so that we can register a different loadData function for
+// each platform/binary.
+testLoadStorageHelper = (csv, bucket, org) => {c.from(csv: csv) |> to(bucket: bucket, org: org) return from(bucket: bucket) }
+testLoadMem = (csv) => c.from(csv: csv)
 `
 
 var skipTests = map[string]string{

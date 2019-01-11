@@ -3,6 +3,7 @@ package spectests
 import (
 	"github.com/influxdata/flux"
 	"github.com/influxdata/flux/stdlib/universe"
+	"github.com/influxdata/influxdb/query/functions/inputs"
 )
 
 func init() {
@@ -13,7 +14,7 @@ func init() {
 				Operations: []*flux.Operation{
 					{
 						ID:   "databases0",
-						Spec: &influxdb.DatabasesOpSpec{},
+						Spec: &inputs.DatabasesOpSpec{},
 					},
 					{
 						ID: "rename0",
