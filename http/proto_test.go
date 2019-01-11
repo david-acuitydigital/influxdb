@@ -193,7 +193,7 @@ func TestProtoHandler(t *testing.T) {
 		    }
 		  ],
 		  "links": {
-		    "self": "/api/v2/dashboards"
+		    "self": "/api/v2/dashboards?orgID=0000000000000001"
 		  }
 		}
 		`,

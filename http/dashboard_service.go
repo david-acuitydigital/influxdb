@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"path"
 	"strconv"
 
@@ -258,7 +259,7 @@ func (h *DashboardHandler) handleGetDashboards(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	if err := encodeResponse(ctx, w, http.StatusOK, newGetDashboardsResponse(ctx, dashboards, h.LabelService)); err != nil {
+	if err := encodeResponse(ctx, w, http.StatusOK, newGetDashboardsResponse(ctx, dashboards, req.filter, h.LabelService)); err != nil {
 		logEncodingError(h.Logger, r, err)
 		return
 	}
@@ -324,10 +325,28 @@ func (d getDashboardsResponse) toPlatform() []*platform.Dashboard {
 	return res
 }
 
-func newGetDashboardsResponse(ctx context.Context, dashboards []*platform.Dashboard, labelService platform.LabelService) getDashboardsResponse {
+func newGetDashboardsResponse(ctx context.Context, dashboards []*platform.Dashboard, filter platform.DashboardFilter, labelService platform.LabelService) getDashboardsResponse {
+	qp := url.Values{}
+	for _, id := range filter.IDs {
+		qp.Add("id", id.String())
+	}
+
+	if filter.OrganizationID != nil {
+		qp.Add("orgID", filter.OrganizationID.String())
+	}
+
+	if filter.Organization != nil {
+		qp.Add("org", *filter.Organization)
+	}
+
+	self := "/api/v2/dashboards"
+	if len(qp) > 0 {
+		self = self + "?" + qp.Encode()
+	}
+
 	res := getDashboardsResponse{
 		Links: getDashboardsLinks{
-			Self: "/api/v2/dashboards",
+			Self: self,
 		},
 		Dashboards: make([]dashboardResponse, 0, len(dashboards)),
 	}
